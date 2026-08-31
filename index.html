@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#142645">
+<link rel="manifest" href="./manifest.json">
+<link rel="icon" href="./icon-192.png">
+<link rel="apple-touch-icon" href="./icon-192.png">
+<title>Class X Drive — App</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#142645;
+    --ink-soft:#28406b;
+    --paper:#EEF1F6;
+    --paper-card:#FFFFFF;
+    --marigold:#E7A23C;
+    --marigold-deep:#c9821f;
+    --maroon:#8B2E2E;
+    --text:#20263a;
+    --text-soft:#5a6178;
+    --line:#c9cedb;
+    --radius:2px;
+    --bar-h:60px;
+    --nav-h:74px;
+  }
+  *{box-sizing:border-box;}
+  html,body{ height:100%; }
+  body{
+    margin:0;
+    background:#0c1730;
+    color:var(--text);
+    font-family:'IBM Plex Sans', sans-serif;
+    line-height:1.5;
+    display:flex;
+    justify-content:center;
+  }
+  h1,h2,h3{ font-family:'Fraunces', serif; margin:0; color:var(--ink); font-weight:600; }
+  .mono{ font-family:'IBM Plex Mono', monospace; }
+  a{ color:inherit; }
+  button{ font-family:inherit; }
+  a:focus-visible, button:focus-visible{ outline:3px solid var(--marigold); outline-offset:2px; }
+  @media (prefers-reduced-motion: reduce){
+    *{ animation-duration:0.001ms !important; animation-iteration-count:1 !important; transition-duration:0.001ms !important; }
+  }
+  .app-shell{
+    width:100%; max-width:460px; min-height:100vh;
+    background:var(--paper); position:relative;
+    box-shadow:0 0 0 1px rgba(255,255,255,0.06);
+    display:flex; flex-direction:column;
+  }
+  @media (min-width:520px){
+    body{ padding:32px 0; }
+    .app-shell{
+      min-height:860px; max-height:860px; border-radius:28px; overflow:hidden;
+      box-shadow:0 30px 70px rgba(0,0,0,0.55), 0 0 0 8px #06101f;
+    }
+  }
+  .appbar{
+    position:sticky; top:0; z-index:20; height:var(--bar-h);
+    background:var(--ink); color:#fff;
+    display:flex; align-items:center; justify-content:space-between;
+    padding:0 18px; border-bottom:3px solid var(--marigold); flex-shrink:0;
+  }
+  .appbar .brand{ display:flex; align-items:center; gap:10px; }
+  .appbar .brand svg{ width:26px; height:26px; }
+  .appbar h1{ color:#fff; font-size:16px; font-weight:600; letter-spacing:0.01em; }
+  .appbar .screen-tag{
+    font-family:'IBM Plex Mono', monospace; font-size:10.5px; letter-spacing:0.1em;
+    text-transform:uppercase; color:var(--marigold);
+  }
+  .screens{
+    flex:1; overflow-y:auto; -webkit-overflow-scrolling:touch;
+    padding-bottom:calc(var(--nav-h) + 24px);
+  }
+  .screen{ display:none; animation:fade-in 0.25s ease; }
+  .screen.active{ display:block; }
+  @keyframes fade-in{ from{ opacity:0; transform:translateY(6px); } to{ opacity:1; transform:translateY(0);} }
+  .pad{ padding:20px 18px 8px; }
+  .hero{ background:var(--ink); color:#eef1f6; padding:26px 18px 30px; position:relative; overflow:hidden; }
+  .hero::before{
+    content:""; position:absolute; inset:0;
+    background-image:repeating-linear-gradient(0deg, rgba(255,255,255,0.035) 0px, rgba(255,255,255,0.035) 1px, transparent 1px, transparent 30px);
+  }
+  .hero-top{ position:relative; z-index:1; display:flex; justify-content:space-between; gap:14px; align-items:flex-start; }
+  .eyebrow{
+    font-family:'IBM Plex Mono', monospace; font-size:10.5px; letter-spacing:0.14em; text-transform:uppercase;
+    color:var(--marigold); display:block; margin-bottom:10px;
+  }
+  .hero h2{ color:#fff; font-size:26px; line-height:1.1; max-width:14ch; }
+  .hero p{ margin-top:10px; color:#c7cee2; font-size:13.5px; max-width:34ch; position:relative; z-index:1; }
+  .seal{ flex-shrink:0; width:72px; height:72px; transform:rotate(-9deg); }
+  .ticker{ background:var(--marigold); color:var(--ink); overflow:hidden; white-space:nowrap; }
+  .ticker-track{ display:inline-flex; align-items:center; padding:8px 0; animation:scroll-left 26s linear infinite; }
+  .ticker-track span{
+    font-family:'IBM Plex Mono', monospace; font-size:11.5px; font-weight:600;
+    padding:0 20px; border-right:1px solid rgba(20,38,69,0.35);
+  }
+  @keyframes scroll-left{ 0%{ transform:translateX(0);} 100%{ transform:translateX(-50%);} }
+  .section-label{ display:flex; align-items:center; gap:8px; margin:22px 0 12px; }
+  .section-label .num{ font-family:'IBM Plex Mono', monospace; color:var(--marigold-deep); font-size:12px; font-weight:600; }
+  .section-label h3{ font-size:15px; text-transform:uppercase; letter-spacing:0.04em; }
+  .stamp-card{
+    position:relative; background:var(--paper-card); border:1px dashed var(--line);
+    padding:18px 16px 16px; border-radius:var(--radius); margin-bottom:12px;
+  }
+  .stamp-card .tag{
+    position:absolute; top:-10px; right:14px; background:var(--maroon); color:#fff;
+    font-family:'IBM Plex Mono', monospace; font-size:10px; letter-spacing:0.06em;
+    padding:4px 8px; transform:rotate(3deg);
+  }
+  .stamp-card h4{ font-family:'Fraunces', serif; font-size:16px; margin:0 0 6px; padding-right:70px; color:var(--ink); font-weight:600; }
+  .stamp-card p{ color:var(--text-soft); font-size:13px; margin:0 0 12px; }
+  .stamp-card .file-link{
+    font-family:'IBM Plex Mono', monospace; font-size:11.5px; color:var(--ink);
+    text-decoration:none; border-bottom:1px solid var(--marigold); padding-bottom:2px;
+  }
+  .notes-strip{ display:flex; flex-direction:column; gap:0; border-top:1px solid var(--line); margin-top:6px; }
+  .note{ padding:14px 2px; border-bottom:1px solid var(--line); }
+  .note .qnum{ font-family:'IBM Plex Mono', monospace; color:var(--marigold-deep); font-size:11px; display:block; margin-bottom:4px; }
+  .note p{ margin:0; font-family:'Fraunces', serif; font-size:14px; color:var(--ink); line-height:1.4; }
+  .timetable{ display:flex; flex-direction:column; gap:10px; }
+  .period-card{
+    background:var(--paper-card); border:1px solid var(--line); border-radius:var(--radius);
+    padding:14px 16px; text-decoration:none; color:var(--text);
+    display:flex; align-items:center; justify-content:space-between; gap:12px;
+  }
+  .period-card:active{ border-color:var(--marigold-deep); }
+  .period-card .left{ display:flex; align-items:center; gap:12px; }
+  .period-card .code{
+    font-family:'IBM Plex Mono', monospace; font-size:11px; color:#fff;
+    background:var(--ink); padding:5px 9px; border-radius:2px; letter-spacing:0.04em;
+    min-width:52px; text-align:center;
+  }
+  .period-card h4{ font-family:'Fraunces', serif; font-size:15px; color:var(--ink); font-weight:600; }
+  .period-card .period-no{ font-family:'IBM Plex Mono', monospace; font-size:10px; color:var(--text-soft); display:block; margin-top:2px; }
+  .period-card .go{ font-family:'IBM Plex Mono', monospace; font-size:11px; color:var(--marigold-deep); flex-shrink:0; }
+  .resource-list{ display:flex; flex-direction:column; }
+  .resource-row{
+    display:flex; align-items:center; gap:12px; padding:14px 0; border-bottom:1px solid var(--line);
+    text-decoration:none; color:var(--text);
+  }
+  .resource-row .rdate{ font-family:'IBM Plex Mono', monospace; font-size:10.5px; color:var(--text-soft); min-width:48px; flex-shrink:0; }
+  .resource-row .rtitle{ font-size:14px; font-weight:600; color:var(--ink); display:block; }
+  .resource-row .rnote{ font-size:12px; color:var(--text-soft); font-weight:400; display:block; margin-top:2px; }
+  .resource-row .rarrow{ font-family:'IBM Plex Mono', monospace; font-size:11px; color:var(--marigold-deep); flex-shrink:0; }
+  .chip-row{ display:flex; flex-wrap:wrap; gap:8px; margin-top:16px; }
+  .chip{
+    font-family:'IBM Plex Mono', monospace; font-size:11.5px; padding:8px 12px;
+    border:1px solid var(--ink); border-radius:20px; text-decoration:none; color:var(--ink);
+  }
+  .chip:active{ background:var(--ink); color:#fff; }
+  .stub{
+    border:1px dashed var(--line); padding:18px 16px; border-radius:var(--radius);
+    margin-bottom:14px; background:var(--paper-card);
+  }
+  .stub .mono-label{
+    font-family:'IBM Plex Mono', monospace; font-size:10px; letter-spacing:0.1em; text-transform:uppercase;
+    color:var(--marigold-deep); display:block; margin-bottom:8px;
+  }
+  .stub h4{ font-family:'Fraunces', serif; font-size:16px; margin-bottom:6px; color:var(--ink); font-weight:600; }
+  .stub p{ color:var(--text-soft); font-size:13px; margin:0 0 14px; }
+  .btn{
+    display:inline-flex; align-items:center; gap:8px; padding:11px 16px; border-radius:var(--radius);
+    font-family:'IBM Plex Mono', monospace; font-size:12.5px; text-decoration:none;
+    border:1px solid var(--ink); color:var(--ink); background:none; cursor:pointer;
+  }
+  .btn-solid{ background:var(--ink); color:#fff; }
+  .btn[disabled]{ opacity:0.5; cursor:not-allowed; }
+  .status-line{ font-family:'IBM Plex Mono', monospace; font-size:11.5px; color:var(--text-soft); margin-top:10px; }
+  .bottom-nav{
+    position:sticky; bottom:0; z-index:30; height:var(--nav-h); background:var(--ink);
+    display:flex; border-top:1px solid rgba(255,255,255,0.08); flex-shrink:0;
+    padding-bottom:env(safe-area-inset-bottom);
+  }
+  .nav-btn{
+    flex:1; background:none; border:none; cursor:pointer;
+    display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px;
+    color:#8994b3; padding:8px 0 10px;
+  }
+  .nav-btn svg{ width:20px; height:20px; stroke:currentColor; }
+  .nav-btn span{ font-family:'IBM Plex Mono', monospace; font-size:9.5px; letter-spacing:0.03em; }
+  .nav-btn.active{ color:var(--marigold); }
+  .fab{
+    position:absolute; right:16px; bottom:calc(var(--nav-h) + 16px); z-index:25;
+    width:52px; height:52px; border-radius:50%; background:var(--marigold); color:var(--ink);
+    display:flex; align-items:center; justify-content:center; text-decoration:none;
+    box-shadow:0 8px 18px rgba(0,0,0,0.35); border:none;
+  }
+  .fab svg{ width:24px; height:24px; }
+</style>
+</head>
+<body>
+
+<div class="app-shell">
+
+  <div class="appbar">
+    <div class="brand">
+      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="12" cy="12" r="10" stroke="#E7A23C" stroke-width="1.6"/>
+        <path d="M8 12.5l2.5 2.5L16 9" stroke="#E7A23C" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <h1>Class X Drive</h1>
+    </div>
+    <span class="screen-tag" id="screen-tag">Home</span>
+  </div>
+
+  <div class="screens">
+
+    <section class="screen active" data-screen="home">
+      <div class="hero">
+        <div class="hero-top">
+          <div>
+            <span class="eyebrow">Circular No. 07/2026</span>
+            <h2>Everything for<br>Class X, in<br>one place</h2>
+            <p>Notes, PYQs and sample papers — kept current in Updates.</p>
+          </div>
+          <svg class="seal" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <circle cx="60" cy="60" r="56" stroke="#E7A23C" stroke-width="2" stroke-dasharray="3 4"/>
+            <circle cx="60" cy="60" r="44" stroke="#E7A23C" stroke-width="1.5"/>
+            <text x="60" y="46" text-anchor="middle" fill="#E7A23C" font-family="IBM Plex Mono, monospace" font-size="9" letter-spacing="1">CBSE · X</text>
+            <text x="60" y="66" text-anchor="middle" fill="#E7A23C" font-family="Fraunces, serif" font-size="13" font-weight="600">2026–27</text>
+            <text x="60" y="84" text-anchor="middle" fill="#E7A23C" font-family="IBM Plex Mono, monospace" font-size="8" letter-spacing="1">VERIFIED</text>
+          </svg>
+        </div>
+      </div>
+
+      <div class="ticker" role="marquee" aria-label="Daily updates ticker">
+        <div class="ticker-track">
+          <span>14 AUG — Guidelines posted for using Gemini inside the Drive</span>
+          <span>DRIVE LOG — CBSE circulars &amp; upload status updated</span>
+          <span>NOTICE — Read the guidelines before browsing materials</span>
+          <span>14 AUG — Guidelines posted for using Gemini inside the Drive</span>
+          <span>DRIVE LOG — CBSE circulars &amp; upload status updated</span>
+          <span>NOTICE — Read the guidelines before browsing materials</span>
+        </div>
+      </div>
+
+      <div class="pad">
+        <div class="section-label"><span class="num">01</span><h3>Must read first</h3></div>
+
+        <div class="stamp-card">
+          <span class="tag">MUST READ</span>
+          <h4>How to use the Drive</h4>
+          <p>Setup, navigation and the daily‑update habit — the operating manual for this Drive.</p>
+          <a class="file-link" href="https://docs.google.com/document/d/1u1IlmVu4hQStFuoVk_FPZZ60jGk3mjmt0EbQgXmU9X0/edit?tab=t.0" target="_blank" rel="noopener">Open guidelines ↗</a>
+        </div>
+
+        <div class="stamp-card">
+          <span class="tag">WORTH IT</span>
+          <h4>My Class X journey — lessons learnt</h4>
+          <p>A senior's framework for reading, PYQs and avoiding resource overload.</p>
+          <a class="file-link" href="https://drive.google.com/file/d/1NXZFto8yYPwK-RUzG1HflvThPA1oju31/view?usp=drivesdk" target="_blank" rel="noopener">Read the account ↗</a>
+        </div>
+
+        <div class="notes-strip">
+          <div class="note"><span class="qnum">01</span><p>English is the gateway — it unlocks Science, Social Science and Maths word problems.</p></div>
+          <div class="note"><span class="qnum">02</span><p>Pick one guide per subject. Trust it fully instead of hopping between teachers.</p></div>
+          <div class="note"><span class="qnum">03</span><p>PYQs are non‑negotiable — solve them without looking at the answers, repeatedly.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="screen" data-screen="subjects">
+      <div class="pad">
+        <div class="section-label"><span class="num">02</span><h3>Subject timetable</h3></div>
+        <div class="timetable">
+          <a class="period-card" href="https://drive.google.com/drive/folders/1LiSlPYiBGHBQlOY4rsi8EIuAl0mHLrhH" target="_blank" rel="noopener">
+            <div class="left"><span class="code">ENG</span><div><h4>English</h4><span class="period-no">Period 1</span></div></div>
+            <span class="go">OPEN →</span>
+          </a>
+          <a class="period-card" href="https://drive.google.com/drive/folders/1wKru0b0MEZNGKF-o81KXIr2Zi7UhynEc" target="_blank" rel="noopener">
+            <div class="left"><span class="code">SST</span><div><h4>Social Science</h4><span class="period-no">Period 2</span></div></div>
+            <span class="go">OPEN →</span>
+          </a>
+          <a class="period-card" href="https://drive.google.com/drive/folders/1C3QsbTWAawWCZAFdVKD9FivxiRKR7ZwQ" target="_blank" rel="noopener">
+            <div class="left"><span class="code">MATH</span><div><h4>Mathematics</h4><span class="period-no">Period 3</span></div></div>
+            <span class="go">OPEN →</span>
+          </a>
+          <a class="period-card" href="https://drive.google.com/drive/folders/1dnLPu8Lp8TPogB6acJchf0_2hfhzQBzk" target="_blank" rel="noopener">
+            <div class="left"><span class="code">SCI</span><div><h4>Science</h4><span class="period-no">Period 4</span></div></div>
+            <span class="go">OPEN →</span>
+          </a>
+          <a class="period-card" href="https://drive.google.com/drive/folders/1SsUe4v4-sZuvK3Wq-3c5GaImwcK8RayZ" target="_blank" rel="noopener">
+            <div class="left"><span class="code">KAN</span><div><h4>ಕನ್ನಡ</h4><span class="period-no">Period 5</span></div></div>
+            <span class="go">OPEN →</span>
+          </a>
+          <a class="period-card" href="https://drive.google.com/drive/folders/1jZvqfCARG8HSh-I5aclZAHsJLbprMaH4" target="_blank" rel="noopener">
+            <div class="left"><span class="code">HIN-B</span><div><h4>हिंदी‑बी</h4><span class="period-no">Period 6</span></div></div>
+            <span class="go">OPEN →</span>
+          </a>
+          <a class="period-card" href="https://drive.google.com/drive/folders/1ZChkwlVcqvIe4QIFbqSJjVBugdm8xFdH" target="_blank" rel="noopener">
+            <div class="left"><span class="code">IT402</span><div><h4>IT 402</h4><span class="period-no">Period 7</span></div></div>
+            <span class="go">OPEN →</span>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <section class="screen" data-screen="papers">
+      <div class="pad">
+        <div class="section-label"><span class="num">03</span><h3>Sample papers</h3></div>
+
+        <a class="resource-row" href="https://drive.google.com/drive/folders/1lfK3Fp8GeagJSfSFX_Eh2A9xGxYi30jd" target="_blank" rel="noopener">
+          <span class="rdate mono">FOLDER</span>
+          <span style="flex:1">
+            <span class="rtitle">All subjects — sample papers</span>
+            <span class="rnote">Past‑year papers, including IT 402.</span>
+          </span>
+          <span class="rarrow">→</span>
+        </a>
+
+        <div class="chip-row">
+          <a class="chip" href="https://cbseacademic.nic.in/sqp_archive.html" target="_blank" rel="noopener">CBSE archive ↗</a>
+          <a class="chip" href="https://cbseacademic.nic.in/skill-education-sqp_archive.html" target="_blank" rel="noopener">IT 402 archive ↗</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="screen" data-screen="updates">
+      <div class="pad">
+        <div class="section-label"><span class="num">04</span><h3>Daily updates log</h3></div>
+        <div class="resource-list">
+          <a class="resource-row" href="https://docs.google.com/document/d/1ki3xTfWXZUFKAiRu-0Abmto3hYYaG-ddoTlEW0VCxIg/edit?tab=t.0" target="_blank" rel="noopener">
+            <span class="rdate mono">09 AUG</span>
+            <span style="flex:1"><span class="rtitle">Circulars &amp; drive update status</span><span class="rnote">Running log of what's newly uploaded.</span></span>
+            <span class="rarrow">→</span>
+          </a>
+          <a class="resource-row" href="https://drive.google.com/file/d/1gjxXDLJXfKhBeQfC065BM9TibWuyvurD/view?usp=drivesdk" target="_blank" rel="noopener">
+            <span class="rdate mono">15 AUG</span>
+            <span style="flex:1"><span class="rtitle">Notice for Class 10 students</span><span class="rnote">Operational guidelines and study strategy.</span></span>
+            <span class="rarrow">→</span>
+          </a>
+          <a class="resource-row" href="https://drive.google.com/file/d/1JfCMJ74XMojQAg7PbnS1sEJtIUEnBNE_/view?usp=drivesdk" target="_blank" rel="noopener">
+            <span class="rdate mono">14 AUG</span>
+            <span style="flex:1"><span class="rtitle">Using Gemini with this Drive</span><span class="rnote">Summarise and query PDFs with Drive's AI.</span></span>
+            <span class="rarrow">→</span>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <section class="screen" data-screen="more">
+      <div class="pad">
+        <div class="section-label"><span class="num">05</span><h3>More</h3></div>
+
+        <div class="stub">
+          <span class="mono-label">Push notifications</span>
+          <h4>Get notified of new updates</h4>
+          <p id="push-copy">Turn this on to get a notification the moment a new circular or file is posted — even if the app is closed.</p>
+          <button class="btn btn-solid" id="push-toggle">Enable notifications</button>
+          <div class="status-line" id="push-status"></div>
+        </div>
+
+        <div class="stub">
+          <span class="mono-label">Found a broken link?</span>
+          <h4>Feedback &amp; suggestions</h4>
+          <p>Screenshot the issue and file it — broken links get fixed fastest this way.</p>
+          <a class="btn" href="https://docs.google.com/forms/d/e/1FAIpQLSf3kynXCEu8R5F-TLlatMdrbtpUJ3UmPCTs8XXJFlK0wPMmSQ/viewform?usp=header" target="_blank" rel="noopener">Open the form →</a>
+        </div>
+
+        <div class="stub">
+          <span class="mono-label">Stay notified on WhatsApp too</span>
+          <h4>WhatsApp updates channel</h4>
+          <p>Notifications only — circulars, alerts and essential updates for Class X.</p>
+          <a class="btn btn-solid" href="https://whatsapp.com/channel/0029VbDKUk9BVJkx1zao703t" target="_blank" rel="noopener">Join the channel →</a>
+        </div>
+
+        <div class="stub">
+          <span class="mono-label">Root access</span>
+          <h4>Full Drive folder</h4>
+          <p>Browse the raw folder structure directly in Google Drive.</p>
+          <a class="btn" href="https://drive.google.com/drive/folders/1qt84cRtq7s1yl3cHw06Qv_HhXoM3jg6c" target="_blank" rel="noopener">Open Drive →</a>
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+  <a class="fab" href="https://whatsapp.com/channel/0029VbDKUk9BVJkx1zao703t" target="_blank" rel="noopener" aria-label="Join WhatsApp channel">
+    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M20 12a8 8 0 1 1-3.6-6.7" stroke="#142645" stroke-width="1.8" stroke-linecap="round"/>
+      <path d="M20 4l-4.5 8L20 12" stroke="#142645" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+  </a>
+
+  <nav class="bottom-nav" aria-label="Primary">
+    <button class="nav-btn active" data-target="home">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/></svg>
+      <span>Home</span>
+    </button>
+    <button class="nav-btn" data-target="subjects">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+      <span>Subjects</span>
+    </button>
+    <button class="nav-btn" data-target="papers">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M9 13h6M9 17h6"/></svg>
+      <span>Papers</span>
+    </button>
+    <button class="nav-btn" data-target="updates">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 1 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg>
+      <span>Updates</span>
+    </button>
+    <button class="nav-btn" data-target="more">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="5" cy="12" r="1.4"/><circle cx="12" cy="12" r="1.4"/><circle cx="19" cy="12" r="1.4"/></svg>
+      <span>More</span>
+    </button>
+  </nav>
+
+</div>
+
+<script>
+  const navBtns = document.querySelectorAll('.nav-btn');
+  const screens = document.querySelectorAll('.screen');
+  const screenTag = document.getElementById('screen-tag');
+  const labels = { home:'Home', subjects:'Subjects', papers:'Papers', updates:'Updates', more:'More' };
+  const scrollArea = document.querySelector('.screens');
+
+  navBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const target = btn.dataset.target;
+      navBtns.forEach(b => b.classList.toggle('active', b === btn));
+      screens.forEach(s => s.classList.toggle('active', s.dataset.screen === target));
+      screenTag.textContent = labels[target];
+      scrollArea.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+  });
+
+  // ---- push notifications ----
+  // Set this to your deployed backend URL after Step 3 of the deploy guide, e.g.
+  // const BACKEND_URL = "https://classx-push.onrender.com";
+  const BACKEND_URL = "https://YOUR-BACKEND-URL-HERE";
+
+  const pushBtn = document.getElementById('push-toggle');
+  const pushStatus = document.getElementById('push-status');
+
+  function urlBase64ToUint8Array(base64String) {
+    const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
+    const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+    const rawData = atob(base64);
+    return Uint8Array.from([...rawData].map(c => c.charCodeAt(0)));
+  }
+
+  async function setupPush() {
+    if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
+      pushStatus.textContent = 'Push notifications are not supported on this browser.';
+      pushBtn.disabled = true;
+      return;
+    }
+    if (BACKEND_URL.includes('YOUR-BACKEND-URL-HERE')) {
+      pushStatus.textContent = 'Backend not configured yet — see the deploy guide.';
+      pushBtn.disabled = true;
+      return;
+    }
+    const reg = await navigator.serviceWorker.register('./service-worker.js');
+    const existing = await reg.pushManager.getSubscription();
+    if (existing) {
+      pushBtn.textContent = 'Notifications enabled ✓';
+      pushStatus.textContent = 'You will get an update the moment one is posted.';
+    }
+  }
+
+  pushBtn?.addEventListener('click', async () => {
+    pushBtn.disabled = true;
+    pushStatus.textContent = 'Requesting permission…';
+    try {
+      const permission = await Notification.requestPermission();
+      if (permission !== 'granted') {
+        pushStatus.textContent = 'Permission denied. Re-enable it in your browser site settings.';
+        pushBtn.disabled = false;
+        return;
+      }
+      const reg = await navigator.serviceWorker.ready;
+      const keyRes = await fetch(`${BACKEND_URL}/api/vapid-public-key`);
+      const { publicKey } = await keyRes.json();
+      const subscription = await reg.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: urlBase64ToUint8Array(publicKey),
+      });
+      await fetch(`${BACKEND_URL}/api/subscribe`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(subscription),
+      });
+      pushBtn.textContent = 'Notifications enabled ✓';
+      pushStatus.textContent = 'You will get an update the moment one is posted.';
+    } catch (err) {
+      pushStatus.textContent = `Could not enable notifications: ${err.message}`;
+    } finally {
+      pushBtn.disabled = false;
+    }
+  });
+
+  setupPush();
+</script>
+
+</body>
+</html>

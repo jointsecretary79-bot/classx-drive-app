@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Send an update — Class X Drive</title>
+<style>
+  body{ font-family:'IBM Plex Sans', Arial, sans-serif; background:#0c1730; color:#eef1f6; display:flex; justify-content:center; padding:40px 16px; }
+  .card{ background:#142645; padding:28px; border-radius:8px; max-width:420px; width:100%; }
+  h1{ font-size:20px; margin:0 0 6px; }
+  p.sub{ color:#aeb6cc; font-size:13px; margin:0 0 22px; }
+  label{ display:block; font-size:12px; color:#c7cee2; margin:14px 0 6px; }
+  input, textarea{ width:100%; padding:10px 12px; border-radius:4px; border:1px solid #28406b; background:#0c1730; color:#fff; font-family:inherit; font-size:14px; }
+  textarea{ min-height:70px; resize:vertical; }
+  button{ margin-top:20px; width:100%; padding:12px; background:#E7A23C; color:#142645; border:none; border-radius:4px; font-weight:700; font-size:14px; cursor:pointer; }
+  button:disabled{ opacity:0.6; cursor:not-allowed; }
+  #status{ margin-top:14px; font-size:13px; color:#aeb6cc; }
+  #backend{ margin-bottom:18px; }
+</style>
+</head>
+<body>
+  <div class="card">
+    <h1>Send an update</h1>
+    <p class="sub">Broadcasts a notification to everyone who has enabled updates.</p>
+
+    <label for="backend">Backend URL</label>
+    <input id="backend" placeholder="https://your-backend.onrender.com" />
+
+    <label for="adminKey">Admin key</label>
+    <input id="adminKey" type="password" placeholder="matches ADMIN_KEY on the server" />
+
+    <label for="title">Title</label>
+    <input id="title" placeholder="e.g. New Maths PYQs uploaded" />
+
+    <label for="body">Message</label>
+    <textarea id="body" placeholder="Short description of the update"></textarea>
+
+    <label for="url">Link to open (optional)</label>
+    <input id="url" placeholder="https://drive.google.com/..." />
+
+    <button id="send">Send notification</button>
+    <div id="status"></div>
+  </div>
+
+<script>
+  const $ = (id) => document.getElementById(id);
+  $('backend').value = localStorage.getItem('classx_backend') || '';
+  $('adminKey').value = localStorage.getItem('classx_admin_key') || '';
+
+  $('send').addEventListener('click', async () => {
+    const backend = $('backend').value.replace(/\/$/, '');
+    const adminKey = $('adminKey').value;
+    const title = $('title').value.trim();
+    const body = $('body').value.trim();
+    const url = $('url').value.trim();
+    const status = $('status');
+
+    if (!backend || !adminKey || !title || !body) {
+      status.textContent = 'Fill in backend URL, admin key, title and message.';
+      return;
+    }
+
+    localStorage.setItem('classx_backend', backend);
+    localStorage.setItem('classx_admin_key', adminKey);
+
+    $('send').disabled = true;
+    status.textContent = 'Sending…';
+
+    try {
+      const res = await fetch(`${backend}/api/notify`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ adminKey, title, body, url }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to send');
+      status.textContent = `Sent to ${data.sent} of ${data.total} devices.`;
+    } catch (err) {
+      status.textContent = `Error: ${err.message}`;
+    } finally {
+      $('send').disabled = false;
+    }
+  });
+</script>
+</body>
+</html>

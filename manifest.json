@@ -1,0 +1,15 @@
+{
+  "name": "Class X Drive",
+  "short_name": "Class X",
+  "description": "CBSE Class X resource hub — subjects, sample papers and daily updates.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#0c1730",
+  "theme_color": "#142645",
+  "orientation": "portrait",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}

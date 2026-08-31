@@ -1,0 +1,18 @@
+{
+  "name": "classx-drive-push-backend",
+  "version": "1.0.0",
+  "description": "Push notification backend for the Class X Drive app",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "generate-keys": "web-push generate-vapid-keys"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.19.2",
+    "web-push": "^3.6.7"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
