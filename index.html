@@ -432,7 +432,7 @@
   // ---- push notifications ----
   // Set this to your deployed backend URL after Step 3 of the deploy guide, e.g.
   // const BACKEND_URL = "https://classx-push.onrender.com";
-  const BACKEND_URL = "https://YOUR-BACKEND-URL-HERE";
+  const BACKEND_URL = "https://classx-drive-app.onrender.com";
 
   const pushBtn = document.getElementById('push-toggle');
   const pushStatus = document.getElementById('push-status');
@@ -450,7 +450,7 @@
       pushBtn.disabled = true;
       return;
     }
-    if (BACKEND_URL.includes('YOUR-BACKEND-URL-HERE')) {
+    if (BACKEND_URL.includes('https://classx-drive-app.onrender.com')) {
       pushStatus.textContent = 'Backend not configured yet — see the deploy guide.';
       pushBtn.disabled = true;
       return;
