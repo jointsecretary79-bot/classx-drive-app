@@ -29,9 +29,10 @@ const express = require('express');
 const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID || '67192974879-m1ff3lvj5jmql8ljg345uhbroghs0v29.apps.googleusercontent.com';
 const ADMIN_EMAILS = (process.env.ADMIN_EMAILS || 'jointsecretary79@gmail.com').split(',').map((s) => s.trim().toLowerCase()).filter(Boolean);
 const DC = process.env.ZOHO_DC || 'com';
+const clean = (v) => (v || '').trim();
 const Z = {
-  id: process.env.ZOHO_CLIENT_ID, secret: process.env.ZOHO_CLIENT_SECRET,
-  refresh: process.env.ZOHO_REFRESH_TOKEN, book: process.env.ZOHO_WORKBOOK_ID,
+  id: clean(process.env.ZOHO_CLIENT_ID), secret: clean(process.env.ZOHO_CLIENT_SECRET),
+  refresh: clean(process.env.ZOHO_REFRESH_TOKEN), book: clean(process.env.ZOHO_WORKBOOK_ID),
 };
 const zohoOn = !!(Z.id && Z.secret && Z.refresh && Z.book);
 
@@ -94,8 +95,9 @@ module.exports = function mountRegistry(app, upstash) {
     queue[tab].push(obj);
   }
   let flushing = false;
+  let pausedUntil = 0;      // after a Zoho error, wait before trying again (avoids Zoho's "too many requests" lock)
   async function flush() {
-    if (!zohoOn || flushing) return;
+    if (!zohoOn || flushing || Date.now() < pausedUntil) return;
     flushing = true;
     try {
       for (const tab of Object.keys(queue)) {
@@ -105,7 +107,8 @@ module.exports = function mountRegistry(app, upstash) {
           await zohoCall({ method: 'worksheet.records.add', worksheet_name: TABS[tab], json_data: JSON.stringify(batch) });
         } catch (e) {
           console.error('zoho mirror failed (will retry):', tab, e.message);
-          queue[tab].unshift(...batch);          // put them back, try again next round
+          queue[tab].unshift(...batch);          // put them back, try again later
+          pausedUntil = Date.now() + (/too many|Access Denied/i.test(e.message) ? 15 : 5) * 60000;
           break;
         }
       }
