@@ -401,6 +401,9 @@ app.get('/api/alarms/tick', async (req, res) => {
   res.json({ ok: true, devices: Object.keys(alarmDb).length });
 });
 
+// Registration registry (replaces the Google Apps Script web app) — see registry.js
+require('./registry')(app, upstash);
+
 app.listen(PORT, () => {
   console.log(`Class X Drive push backend running on port ${PORT}`);
   migrateLegacyDevices().then(() => loadAlarms()).then(() => alarmTick()).then(scheduleNextAlarm);   // on start / wake-up: load saved alarms and send any that are due
